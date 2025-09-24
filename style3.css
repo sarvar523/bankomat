@@ -1,0 +1,60 @@
+/* ...existing code... */
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+}
+
+.btn-primary i {
+    font-size: 1.1rem;
+}
+
+/* ...existing code... */
+
+.section-title {
+    font-size: 1.25rem;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+}
+
+table td {
+    white-space: nowrap;
+}
+
+tr:nth-child(even) {
+    background: var(--light);
+}
+
+.status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Responsivlik uchun */
+@media (max-width: 1024px) {
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    table {
+        min-width: 800px;
+    }
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Buxgalteriya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #eab308;
+            --danger: #dc2626;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            padding: 2rem;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-title {
+            color: var(--dark);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-paid { background: #dcfce7; color: var(--success); }
+        .status-pending { background: #fef9c3; color: var(--warning); }
+        .status-failed { background: #fee2e2; color: var(--danger); }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .header { flex-direction: column; gap: 1rem; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <h1>Buxgalteriya bo'limi</h1>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Yangi to'lov
+            </button>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Bugungi to'lovlar</div>
+                <div class="stat-value">12,500,000 UZS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Oylik to'lovlar</div>
+                <div class="stat-value">156,300,000 UZS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Kutilayotgan to'lovlar</div>
+                <div class="stat-value">23,450,000 UZS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">To'lovlar soni</div>
+                <div class="stat-value">45</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>To'lov turi</th>
+                        <th>Summa</th>
+                        <th>Sana</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsList">
+                    <!-- JavaScript orqali to'ldiriladi -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+
+    <script>
+        const transactions = [
+            { id: 1, type: "Oylik to'lov", amount: "5,400,000", date: "2025-09-24", status: "paid" },
+            { id: 2, type: "Bonus", amount: "1,200,000", date: "2025-09-24", status: "pending" },
+            { id: 3, type: "Kommunal", amount: "850,000", date: "2025-09-23", status: "paid" },
+            { id: 4, type: "Internet", amount: "450,000", date: "2025-09-23", status: "failed" },
+            { id: 5, type: "Oylik to'lov", amount: "4,800,000", date: "2025-09-22", status: "paid" }
+        ];
+
+        const statusText = {
+            paid: "To'langan",
+            pending: "Kutilmoqda",
+            failed: "Bekor qilingan"
+        };
+
+        const transactionsList = document.getElementById('transactionsList');
+        transactions.forEach(t => {
+            transactionsList.innerHTML += `
+                <tr>
+                    <td>#${t.id}</td>
+                    <td>${t.type}</td>
+                    <td>${t.amount} UZS</td>
+                    <td>${new Date(t.date).toLocaleDateString('uz-UZ')}</td>
+                    <td><span class="status status-${t.status}">${statusText[t.status]}</span></td>
+                </tr>
+            `;
+        });
+        // ...existing code...
+// ...existing code...
+
+function showBuxModal() {
+    document.getElementById('buxModal').style.display = 'flex';
+}
+
+function closeBuxModal() {
+    document.getElementById('buxModal').style.display = 'none';
+}
+
+function handleBuxLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('buxUsername').value;
+    const password = document.getElementById('buxPassword').value;
+    
+    // Buxgalteriya uchun login/parol
+    if(username === 'bux' && password === 'bux123') {
+        window.location.href = 'index3.html';
+    } else {
+        alert('Login yoki parol noto\'g\'ri!');
+    }
+}
+
+// Modal tashqarisini bosganda yopish
+window.onclick = function(e) {
+    const modal = document.getElementById('buxModal');
+    if (e.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+</body>
+</html>

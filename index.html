@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Tizimi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --dark: #1e293b; --light: #f1f5f9; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--light); }
+        .container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+        .sidebar { background: white; padding: 1rem; border-right: 1px solid var(--border); }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 2rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; color: var(--dark); text-decoration: none; border-radius: 0.5rem; margin-bottom: 0.5rem; transition: all 0.3s; cursor:pointer;}
+        .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
+        .main { padding: 2rem; }
+        .balance-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom:1rem;}
+        .card-title { font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
+        .card-value { font-size: 1.5rem; font-weight: 600; }
+        .transaction-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; margin-bottom: 2rem; }
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; font-size: 1rem; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .transaction-list { background: white; border-radius: 0.5rem; overflow: hidden; }
+        .transaction-item { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border); }
+        .transaction-info { display: flex; align-items: center; gap: 1rem; }
+        .transaction-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        .income { background: var(--success); }
+        .expense { background: var(--danger); }
+        .cards-page { display: none; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .bank-card { background: linear-gradient(135deg, #2563eb, #1e40af); color: white; padding: 1.5rem; border-radius: 1rem; aspect-ratio: 1.6; position: relative; overflow: hidden; transition: transform 0.3s; }
+        .bank-card:hover { transform: translateY(-5px); }
+        .card-chip { font-size: 2rem; margin-bottom: 2rem; }
+        .card-number { font-size: 1.25rem; letter-spacing: 0.2em; margin-bottom: 2rem; }
+        .card-footer { display: flex; justify-content: space-between; font-size: 0.875rem; text-transform: uppercase; }
+        .card-balance { position: absolute; top: 1rem; right: 1rem; font-weight: bold; }
+        .add-card-btn { background: var(--light); border: 2px dashed var(--border); border-radius: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; cursor: pointer; aspect-ratio: 1.6; transition: all 0.3s; font-size:1rem;}
+        .add-card-btn:hover { background: white; border-color: var(--primary); color: var(--primary); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index:1000;}
+        .modal-content { background: white; padding: 2rem; border-radius: 0.5rem; width: 90%; max-width: 400px; position: relative; }
+        .close-btn { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--dark); cursor: pointer; }
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .transaction-form { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+                <span>Bank Tizimi</span>
+            </div>
+            <nav>
+                <a href="#" class="nav-item active" data-page="main"><i class="fas fa-home"></i><span>Asosiy</span></a>
+                <a href="#" class="nav-item" data-page="transfers"><i class="fas fa-exchange-alt"></i><span>O'tkazmalar</span></a>
+                <a href="#" class="nav-item" data-page="cards"><i class="fas fa-credit-card"></i><span>Kartalar</span></a>
+                <a href="#" class="nav-item" data-page="history"><i class="fas fa-history"></i><span>Tarix</span></a>
+                <a href="#" class="nav-item" onclick="showLoginModal()"><i class="fas fa-user"></i><span>Kirish</span></a>
+            </nav>
+        </aside>
+        <main class="main">
+            <div class="balance-cards" id="mainPage">
+                <div class="card"><div class="card-title">Umumiy balans</div><div class="card-value" id="totalBalance">0 UZS</div></div>
+                <div class="card"><div class="card-title">Kirimlar</div><div class="card-value" id="totalIncome">0 UZS</div></div>
+                <div class="card"><div class="card-title">Chiqimlar</div><div class="card-value" id="totalExpense">0 UZS</div></div>
+            </div>
+            <div class="cards-page" id="cardsPage">
+                <h2>Mening kartalarim</h2>
+                <div class="cards-grid" id="cardsGrid"></div>
+            </div>
+            <div class="card" id="transferCard">
+                <h2>Yangi o'tkazma</h2>
+                <form class="transaction-form" onsubmit="handleTransaction(event)">
+                    <select id="cardSelect" required></select>
+                    <input type="number" id="amount" placeholder="Summa" required>
+                    <select id="type" required>
+                        <option value="income">Kirim</option>
+                        <option value="expense">Chiqim</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i>Qo'shish</button>
+                </form>
+            </div>
+            <div class="card" id="historyCard">
+                <h2>O'tkazmalar tarixi</h2>
+                <div class="transaction-list" id="transactionList"></div>
+            </div>
+        </main>
+    </div>
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            <h2>Tizimga kirish</h2>
+            <form onsubmit="handleLogin(event)">
+                <div style="margin-bottom: 1rem;">
+                    <label>Login</label>
+                    <input type="text" placeholder="admin" id="username" required>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Parol</label>
+                    <input type="password" placeholder="admin123" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Kirish</button>
+            </form>
+        </div>
+    </div>
+    <!-- Add Card Modal -->
+    <div class="modal" id="addCardModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeAddCardModal()">&times;</button>
+            <h2>Yangi karta qo'shish</h2>
+            <form onsubmit="handleAddCard(event)">
+                <div style="margin-bottom: 1rem;">
+                    <label>Karta raqami</label>
+                    <input type="text" id="cardNumber" required pattern="\d{16}" maxlength="16" placeholder="1234567890123456">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Karta egasi</label>
+                    <input type="text" id="cardHolder" required placeholder="CUSTOMER NAME">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Amal qilish muddati</label>
+                    <input type="text" id="cardExpiry" required pattern="\d{2}/\d{2}" maxlength="5" placeholder="MM/YY">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Balans</label>
+                    <input type="number" id="cardBalance" required placeholder="0">
+                </div>
+                <button type="submit" class="btn btn-primary">Saqlash</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        let balance = 0, income = 0, expense = 0, transactions = [], cards = [], currentPage = 'main';
+        let loginCount = Number(localStorage.getItem('loginCount') || '0');
+        const workerCount = 25;
+
+        function formatNumber(num) { return new Intl.NumberFormat('uz-UZ').format(num); }
+        function formatCardNumber(number) { return number.replace(/(\d{4})/g, '$1 ').trim(); }
+
+        function updateUI() {
+            document.getElementById('totalBalance').textContent = formatNumber(balance) + ' UZS';
+            document.getElementById('totalIncome').textContent = formatNumber(income) + ' UZS';
+            document.getElementById('totalExpense').textContent = formatNumber(expense) + ' UZS';
+            const list = document.getElementById('transactionList');
+            list.innerHTML = transactions.map(t => `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon ${t.type}">
+                            <i class="fas fa-${t.type === 'income' ? 'plus' : 'minus'}"></i>
+                        </div>
+                        <div>
+                            <div>${t.type === 'income' ? 'Kirim' : 'Chiqim'}</div>
+                            <small>${new Date(t.date).toLocaleString('uz-UZ')}</small>
+                        </div>
+                    </div>
+                    <div>${formatNumber(t.amount)} UZS</div>
+                </div>
+            `).join('');
+            localStorage.setItem('bankData', JSON.stringify({ balance, income, expense, transactions }));
+        }
+
+        function renderCards() {
+            const cardsGrid = document.getElementById('cardsGrid');
+            cardsGrid.innerHTML = cards.map(card => `
+                <div class="bank-card">
+                    <div class="card-chip"><i class="fas fa-microchip"></i></div>
+                    <div class="card-number">${formatCardNumber(card.number)}</div>
+                    <div class="card-footer">
+                        <div class="card-holder">${card.holder}</div>
+                        <div class="card-expires">${card.expires}</div>
+                    </div>
+                    <div class="card-balance">${formatNumber(card.balance)} UZS</div>
+                </div>
+            `).join('') + `
+                <button class="add-card-btn" onclick="showAddCardModal()">
+                    <i class="fas fa-plus"></i>
+                    Yangi karta qo'shish
+                </button>
+            `;
+            renderCardSelect();
+        }
+
+        function renderCardSelect() {
+            const select = document.getElementById('cardSelect');
+            select.innerHTML = cards.map((card, i) => `<option value="${i}">${formatCardNumber(card.number)} (${card.holder})</option>`).join('');
+        }
+
+        function handleTransaction(e) {
+            e.preventDefault();
+            const cardIdx = Number(document.getElementById('cardSelect').value);
+            const amount = Number(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+            if (type === 'income') {
+                balance += amount;
+                income += amount;
+                cards[cardIdx].balance += amount;
+            } else {
+                if (cards[cardIdx].balance < amount) {
+                    alert("Kartada yetarli mablag' yo'q!");
+                    return;
+                }
+                balance -= amount;
+                expense += amount;
+                cards[cardIdx].balance -= amount;
+            }
+            transactions.unshift({ amount, type, date: new Date().toISOString() });
+            localStorage.setItem('bankCards', JSON.stringify(cards));
+            updateUI();
+            renderCards();
+            e.target.reset();
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username === 'admin' && password === 'admin123') {
+                loginCount++;
+                localStorage.setItem('loginCount', loginCount);
+                const time = new Date().toLocaleTimeString('uz-UZ');
+                localStorage.setItem('lastLogin', JSON.stringify({ user: username, time }));
+                window.location.href = "index2.html";
+            } else {
+                alert('Login yoki parol xato!');
+            }
+        }
+
+        function showAddCardModal() {
+            document.getElementById('addCardModal').style.display = 'flex';
+        }
+        function closeAddCardModal() {
+            document.getElementById('addCardModal').style.display = 'none';
+        }
+        function handleAddCard(e) {
+            e.preventDefault();
+            const newCard = {
+                number: document.getElementById('cardNumber').value,
+                holder: document.getElementById('cardHolder').value.toUpperCase(),
+                expires: document.getElementById('cardExpiry').value,
+                balance: Number(document.getElementById('cardBalance').value)
+            };
+            cards.push(newCard);
+            localStorage.setItem('bankCards', JSON.stringify(cards));
+            document.getElementById('addCardModal').style.display = 'none';
+            e.target.reset();
+            renderCards();
+        }
+
+        function showPage(pageId) {
+            currentPage = pageId;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const nav = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+            if(nav) nav.classList.add('active');
+            document.getElementById('mainPage').style.display = (pageId === 'main') ? 'grid' : 'none';
+            document.getElementById('transferCard').style.display = (pageId === 'main' || pageId === 'transfers') ? 'block' : 'none';
+            document.getElementById('historyCard').style.display = (pageId === 'main' || pageId === 'history') ? 'block' : 'none';
+            document.getElementById('cardsPage').style.display = (pageId === 'cards') ? 'block' : 'none';
+            if(pageId === 'cards') renderCards();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showPage(item.getAttribute('data-page'));
+                });
+            });
+            window.onclick = function(e) {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+            };
+            const savedData = localStorage.getItem('bankData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                balance = data.balance;
+                income = data.income;
+                expense = data.expense;
+                transactions = data.transactions;
+            }
+            const savedCards = localStorage.getItem('bankCards');
+            if (savedCards) cards = JSON.parse(savedCards);
+            updateUI();
+            renderCards();
+            showPage('main');
+        });
+    </script>
+</body>
+</html>
